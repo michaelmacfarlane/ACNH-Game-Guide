@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
-import * as React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { RectButton, ScrollView } from 'react-native-gesture-handler';
 
-export default function FishScreen() {
+function FishScreenold() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <OptionButton
@@ -44,31 +44,38 @@ function OptionButton({ icon, label, onPress, isLastOption }) {
   );
 }
 
+export default class FishScreen extends Component {
+  render() {
+    return (
+        <View style={styles.container}>
+          <FlatList
+              data={[
+                { key: 'Devin' },
+                { key: 'Dan' },
+                { key: 'Dominic' },
+                { key: 'Jackson' },
+                { key: 'James' },
+                { key: 'Joel' },
+                { key: 'John' },
+                { key: 'Jillian' },
+                { key: 'Jimmy' },
+                { key: 'Julie' },
+              ]}
+              renderItem={({ item }) => <Text style={styles.item}>{item.key}</Text>}
+          />
+        </View>
+    );
+  }
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafafa',
+    paddingTop: 22,
   },
-  contentContainer: {
-    paddingTop: 15,
-  },
-  optionIconContainer: {
-    marginRight: 12,
-  },
-  option: {
-    backgroundColor: '#fdfdfd',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: 0,
-    borderColor: '#ededed',
-  },
-  lastOption: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  optionText: {
-    fontSize: 15,
-    alignSelf: 'flex-start',
-    marginTop: 1,
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
   },
 });
