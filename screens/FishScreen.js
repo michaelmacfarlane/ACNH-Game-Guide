@@ -1,71 +1,75 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
 import React, { Component } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { RectButton, ScrollView } from 'react-native-gesture-handler';
+import { Button, FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import * as Helpers from '../helpers/FileHelpers';
 
-function FishScreenold() {
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <OptionButton
-        icon="md-school"
-        label="Read the Expo documentation"
-        onPress={() => WebBrowser.openBrowserAsync('https://docs.expo.io')}
-      />
-
-      <OptionButton
-        icon="md-compass"
-        label="Read the React Navigation documentation"
-        onPress={() => WebBrowser.openBrowserAsync('https://reactnavigation.org')}
-      />
-
-      <OptionButton
-        icon="ios-chatboxes"
-        label="Ask a question on the forums"
-        onPress={() => WebBrowser.openBrowserAsync('https://forums.expo.io')}
-        isLastOption
-      />
-    </ScrollView>
-  );
-}
-
-function OptionButton({ icon, label, onPress, isLastOption }) {
-  return (
-    <RectButton style={[styles.option, isLastOption && styles.lastOption]} onPress={onPress}>
-      <View style={{ flexDirection: 'row' }}>
-        <View style={styles.optionIconContainer}>
-          <Ionicons name={icon} size={22} color="rgba(0,0,0,0.35)" />
-        </View>
-        <View style={styles.optionTextContainer}>
-          <Text style={styles.optionText}>{label}</Text>
-        </View>
-      </View>
-    </RectButton>
-  );
-}
 
 export default class FishScreen extends Component {
-  render() {
-    return (
-        <View style={styles.container}>
-          <FlatList
-              data={[
-                { key: 'Devin' },
-                { key: 'Dan' },
-                { key: 'Dominic' },
-                { key: 'Jackson' },
-                { key: 'James' },
-                { key: 'Joel' },
-                { key: 'John' },
-                { key: 'Jillian' },
-                { key: 'Jimmy' },
-                { key: 'Julie' },
-              ]}
-              renderItem={({ item }) => <Text style={styles.item}>{item.key}</Text>}
-          />
-        </View>
-    );
-  }
+    constructor(props) {
+        super(props);
+        this.state = {
+            dataSource: [],
+            loading: true
+        };
+    }
+
+    componentDidMount() {
+        this.fetchData(true);
+    }
+
+    fetchData = (useCached) => {
+        return new Promise((resolve, reject) => {
+
+            this.setState({loading: true});
+
+            Helpers.getJsonFileContents(useCached, 'fish').then(fishList => {
+
+                this.setState({
+                    loading: false,
+                    dataSource: fishList,
+                });
+
+                resolve(true);
+
+            }).catch(error => {
+                console.log('getJsonFileContents catch', error);
+                this.setState({loading: false});
+
+                resolve(false);
+            });
+        });
+    };
+
+    onRefresh() {
+        console.log('onRefresh');
+
+        const originalProductList = this.state.dataSource;
+
+        this.fetchData(false).then(success => {
+            console.log('Refreshed data');
+        }).catch(error => {
+            console.log('fetchData catch', error);
+            this.setState({
+                dataSource: originalProductList,
+            });
+        });
+    }
+
+    render() {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View>
+                    <Button title="Refresh" onPress={() => this.onRefresh()} />
+                </View>
+                <View style={styles.container}>
+                    <FlatList
+                        data={this.state.dataSource}
+                        renderItem={({ item }) => <Text style={styles.item}>{item.Name}</Text>}
+                        keyExtractor={item => item.id.toString()}
+                    />
+                </View>
+            </SafeAreaView>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
